@@ -11,7 +11,7 @@ import GetStarted from "./components/views/GetStarted.vue";
 import productForm from "./components/views/productForm.vue";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB9QG281c8ge7ZXFdugbVZDivFffaUMm6E",
+  apiKey: import.meta.env.VITE_API_KEY,
   authDomain: "saautos-f99ca.firebaseapp.com",
   projectId: "saautos-f99ca",
   storageBucket: "saautos-f99ca.appspot.com",
@@ -38,5 +38,4 @@ const auth = getAuth(app);
 createApp(App)
     .use(router)
     .mount("#app");
-// const Vapp = createApp(App);
-// Vapp.mount('#app')
+

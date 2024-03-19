@@ -338,7 +338,6 @@ export default {
       const auth = getAuth();
       signOut(auth)
         .then(() => {
-          // Sign-out successful.
           localStorage.clear()
           console.log("Sign-out successful")
         })
@@ -353,15 +352,12 @@ export default {
     const auth = getAuth();
     const user = auth.currentUser;
     if (user !== null) {
-      // The user object has basic properties such as display name, email, etc.
+
       this.displayName = user.displayName;
       const email = user.email;
       const photoURL = user.photoURL;
       const emailVerified = user.emailVerified;
 
-      // The user's ID, unique to the Firebase project. Do NOT use
-      // this value to authenticate with your backend server, if
-      // you have one. Use User.getToken() instead.
       const uid = user.uid;
     }
   }

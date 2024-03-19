@@ -105,16 +105,12 @@
 </template>
 
 <script>
-// import {
-//   createUserWithEmailAndPassword,
-//   signInWithEmailAndPassword,
-//   signOut,
-// } from "firebase/auth";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
 
 export default {
   name: "GetStarted",
@@ -130,40 +126,38 @@ export default {
     toggleShowandHidePassword() {
       this.inputType = this.inputType === "password" ? "text" : "password";
     },
+
     signUp() {
       const auth = getAuth();
+      const db = getFirestore();
+
       createUserWithEmailAndPassword(auth, this.email, this.password)
         .then((userCredential) => {
           const user = userCredential.user;
           console.log(user);
-          // console.log(this.email, this.password, user);
+
+          // save data to database
+          const userData = {
+            username: this.username,
+            email: this.email,
+            authProvider: "local",
+          };
+
+          addDoc(collection(db, "users"), userData)
+            .then(() => {
+              console.log("User added to database successfully");
+            })
+            .catch((error) => {
+              console.error("Error adding user to database: ", error.message);
+            });
           localStorage.setItem("access_token", userCredential.user.accessToken);
-          // this.username = this.username || user.displayName || "";
           alert("hello " + this.username);
           this.$router.push("/");
-          return user.updateProfile({
-            displayName: this.username,
-          });
         })
+
         .catch((error) => {
-          console.error(error.message);
+          console.error("Error adding user to database: ", error.message);
         });
-      const register = async (e) => {
-        if (this.username.length == 0) {
-          alert("name cannot be empty");
-        } else {
-          const { user } = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-          );
-          console.log(`User ${user.uid} created`);
-          await updateProfile(user, {
-            displayName: this.username,
-          });
-          console.log("User profile updated");
-        }
-      };
     },
   },
 };

@@ -74,7 +74,7 @@
     <div class="grid md:grid-cols-2 md:gap-6">
       <div class="relative z-0 w-full mb-5 group">
         <input
-          type="number"
+          type="text"
           name="Current Bid"
           id="Current Bid"
           class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-onyx peer"
@@ -131,7 +131,7 @@
           >Upload file</label
         >
         <input
-          class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-platinum  focus:outline-none "
+          class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-platinum focus:outline-none"
           aria-describedby="Car Image"
           id="Car Image"
           type="file"
@@ -139,10 +139,7 @@
           multiple="true"
           @change="uploadFile()"
         />
-        <div
-          class="mt-1 text-sm text-gray-500"
-          id="Car Image"
-        >
+        <div class="mt-1 text-sm text-gray-500" id="Car Image">
           Upload Front, Left, Right & Back of your car
         </div>
       </div>
@@ -158,27 +155,34 @@
 
 <script>
 export default {
-    name: "Product Form",
-    data(){
-        return {
-            carMake: "",
-            carModel: "",
-            location: "",
-            year: "",
-            currentBid: "",
-            phoneNumber: "",
-            images: null,
-            vin: "",
-        }
+  name: "Product Form",
+  data() {
+    return {
+      carMake: "",
+      carModel: "",
+      location: "",
+      year: "",
+      currentBid: "",
+      phoneNumber: "",
+      images: null,
+      vin: "",
+    };
+  },
+  methods: {
+    uploadFile() {
+      this.images = this.$refs.file.files[0];
+      console.log("Form Data:", this.$data);
     },
-    methods: {
-        uploadFile(){
-            this.images = this.$refs.file.files[0]
-            console.log("Form Data:", this.$data)
-        },
-        splitCurrentBid() {
+    splitCurrentBid() {
+      let bidWithoutCommas = this.currentBid.replace(/,/g, "");
+      if (bidWithoutCommas && /^\d+$/.test(bidWithoutCommas)) {
+        let reversedBid = bidWithoutCommas.split("").reverse().join("");
+        const pattern = /(\d{3})(?=\d)/g;
+        let formattedBid = reversedBid.replace(pattern, "$1,");
+        formattedBid = formattedBid.split("").reverse().join("");
+        this.currentBid = formattedBid;
       }
-    }
-    
-}
+    },
+  },
+};
 </script>
