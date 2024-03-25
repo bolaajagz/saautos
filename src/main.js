@@ -32,6 +32,18 @@ const router = createRouter({
 });
 
 
+// nav guard
+router.beforeEach((to, from, next) => {
+  const accessToken = localStorage.getItem("access_token");
+  if (!accessToken && to.path !== '/getstarted') {
+    next('/getstarted');
+    // console.log("Access token is null");
+  } else {
+    next();
+  }
+});
+
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
