@@ -150,6 +150,7 @@ export default {
             .catch((error) => {
               console.error("Error adding user to database: ", error.message);
             });
+            
           localStorage.setItem("access_token", userCredential.user.accessToken);
           alert("hello " + this.username);
           this.$router.push("/");
