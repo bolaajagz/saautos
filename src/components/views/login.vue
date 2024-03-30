@@ -4,9 +4,9 @@
       <div
         class="w-full max-w-sm md:p-16 border border-gray-200 rounded-lg shadow-lg sm:p-6 p-8 bg-platinum-20"
       >
-        <form class="space-y-6" @submit.prevent="signUp()">
+        <form class="space-y-6" @submit.prevent="login()">
           <h5 class="text-xl font-medium text-white">
-            Sign in to our platform
+            login 
           </h5>
           <div>
             <label for="email" class="block mb-2 text-sm font-medium text-white"
@@ -19,20 +19,6 @@
               v-model="email"
               class="bg-gray-500 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-ashgray focus:border-ashgray block w-full p-2.5"
               placeholder="name@company.com"
-              required
-            />
-          </div>
-          <div>
-            <label for="email" class="block mb-2 text-sm font-medium text-white"
-              >Username</label
-            >
-            <input
-              type="text"
-              name="username"
-              id="username"
-              v-model="username"
-              class="bg-gray-500 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-ashgray focus:border-ashgray block w-full p-2.5"
-              placeholder="username"
               required
             />
           </div>
@@ -85,7 +71,7 @@
               </label>
             </div>
             <a href="#" class="ms-auto text-sm text-white hover:underline">
-              Lost Password?</a
+               Lost Password?</a
             >
           </div>
           <button
@@ -95,8 +81,8 @@
             Login to your account
           </button>
           <div class="text-sm font-medium text-gray-500">
-            Registered?
-            <router-link to="/login" class="text-white hover:underline">Login here</router-link>
+            Not registered?
+            <router-link to="/getstarted" class="text-white hover:underline">Create account</router-link>
           </div>
         </form>
       </div>
@@ -105,12 +91,7 @@
 </template>
 
 <script>
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  updateProfile,
-} from "firebase/auth";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 export default {
   name: "GetStarted",
@@ -120,7 +101,6 @@ export default {
       email: "",
       password: "",
       username: "",
-      userId: "",
     };
   },
   methods: {
@@ -128,38 +108,23 @@ export default {
       this.inputType = this.inputType === "password" ? "text" : "password";
     },
 
-    signUp() {
+    login() {
       const auth = getAuth();
-      const db = getFirestore();
 
-      createUserWithEmailAndPassword(auth, this.email, this.password)
+      signInWithEmailAndPassword(auth, this.email, this.password)
         .then((userCredential) => {
           const user = userCredential.user;
-          console.log(user);
-
-          // save data to database
-          const userData = {
-            username: this.username,
-            email: this.email,
-            authProvider: "local",
-            userId: userCredential.user.uid
-          };
-
-          addDoc(collection(db, "users"), userData)
-            .then(() => {
-              console.log("User added to database successfully");
-            })
-            .catch((error) => {
-              console.error("Error adding user to database: ", error.message);
-            });
-
+          console.log(user)
           localStorage.setItem("access_token", userCredential.user.accessToken);
-          alert("hello " + this.username);
           this.$router.push("/");
         })
 
         .catch((error) => {
-          console.error("Error adding user to database: ", error.message);
+          console.error(
+            "Error signing in...: ",
+            error.message,
+            error.code
+          );
         });
     },
   },

@@ -1,5 +1,5 @@
 <template>
-  <form class="container mx-auto py-10">
+  <form class="container mx-auto py-10" @submit.prevent="submitForm">
     <h1 class="text-3xl py-8">Car Information</h1>
     <div class="grid md:grid-cols-2 md:gap-6">
       <div class="relative z-0 w-full mb-5 group">
@@ -9,7 +9,7 @@
           id="Car Make"
           class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-onyx peer"
           placeholder=" "
-          v-model="carMake"
+          v-model="vehicleDetails.carMake"
           required
         />
         <label
@@ -26,7 +26,7 @@
           class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-onyx peer"
           placeholder=" "
           required
-          v-model="year"
+          v-model="vehicleDetails.year"
         />
         <label
           for="year"
@@ -45,7 +45,7 @@
           class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-onyx peer"
           placeholder=" "
           required
-          v-model="vin"
+          v-model="vehicleDetails.vin"
         />
         <label
           for="VIN"
@@ -61,7 +61,7 @@
           class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-onyx peer"
           placeholder=" "
           required
-          v-model="location"
+          v-model="vehicleDetails.location"
         />
         <label
           for="VIN"
@@ -80,8 +80,8 @@
           class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-onyx peer"
           placeholder=""
           required
-          v-model="currentBid"
-          @input="splitCurrentBid"
+          v-model="vehicleDetails.currentBid"
+          @input="splitCurrentBi"
         />
         <label
           for="Current Bid"
@@ -97,7 +97,7 @@
           class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-onyx peer"
           placeholder=" "
           required
-          v-model="carModel"
+          v-model="vehicleDetails.carModel"
         />
         <label
           for="Car Model"
@@ -116,7 +116,7 @@
           class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-oynx peer"
           placeholder=" "
           required
-          v-model="phoneNumber"
+          v-model="vehicleDetails.phoneNumber"
         />
         <label
           for="floating_phone"
@@ -137,7 +137,7 @@
           type="file"
           ref="file"
           multiple="true"
-          @change="uploadFile()"
+          @change="uploadFile"
         />
         <div class="mt-1 text-sm text-gray-500" id="Car Image">
           Upload Front, Left, Right & Back of your car
@@ -151,38 +151,135 @@
       Submit
     </button>
   </form>
+  <!-- <div>
+    <h2>Vehicle Details</h2>
+    <ul class="grid grid-cols-3 gap-10">
+      <li v-for="info in getVehicleInfo" :key="info.id">
+        <h3>{{ info.id }}</h3>
+        <p v-for="(value, key) in info.data" :key="key">
+          {{ key }}: {{ value }}
+        </p>
+      </li>
+    </ul>
+  </div> -->
 </template>
 
 <script>
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  getDocs,
+} from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
+
 export default {
   name: "Product Form",
   data() {
     return {
-      carMake: "",
-      carModel: "",
-      location: "",
-      year: "",
-      currentBid: "",
-      phoneNumber: "",
-      images: null,
-      vin: "",
+      vehicleDetails: {
+        carMake: "toyota",
+        carModel: "camry",
+        location: "lagos",
+        year: "2014",
+        currentBid: "₦10000",
+        phoneNumber: "0803-123-4567",
+        // images: [""],
+        vin: "12345567",
+        uid: null,
+      },
+      selectedFile: null,
+      // getVehicleInfo: [],
     };
   },
   methods: {
-    uploadFile() {
-      this.images = this.$refs.file.files[0];
-      console.log("Form Data:", this.$data);
-    },
-    splitCurrentBid() {
-      let bidWithoutCommas = this.currentBid.replace(/,/g, "");
-      if (bidWithoutCommas && /^\d+$/.test(bidWithoutCommas)) {
-        let reversedBid = bidWithoutCommas.split("").reverse().join("");
-        const pattern = /(\d{3})(?=\d)/g;
-        let formattedBid = reversedBid.replace(pattern, "$1,");
-        formattedBid = formattedBid.split("").reverse().join("");
-        this.currentBid = formattedBid;
+    async submitForm() {
+      const db = getFirestore();
+      const storage = getStorage();
+
+      this.vehicleDetails.uid = this.uid;
+
+      try {
+        // Add vehicleDetails to Firestore
+        const docRef = await addDoc(
+          collection(db, "vehicleDetails"),
+          this.vehicleDetails
+        );
+        console.log("Document added with ID: ", docRef.id);
+
+        // Upload file to Firebase Storage if selectedFile exists
+        if (this.selectedFile) {
+          const storageRef = ref(storage, `files/${this.selectedFile.name}`);
+          await uploadBytes(storageRef, this.selectedFile);
+          console.log("File uploaded successfully");
+        }
+      } catch (error) {
+        console.error(
+          "Error adding document or uploading file: ",
+          error.message
+        );
       }
     },
+
+    uploadFile(e) {
+      const file = e.target.files[0];
+      this.selectedFile = file;
+    },
+
+    // async getVehicle() {
+    //   const db = getFirestore();
+
+    //   const docRef = doc(db, "vehicleDetails", "aAkPFqKRyZMBgNVRFfwZ");
+    //   const docSnap = await getDoc(docRef);
+    //   if (docSnap.exists()) {
+    //     console.log("Document data:", docSnap.data());
+    //   } else {
+    //     console.log("No such document!");
+    //   }
+    // },
+
+    async getVehicleDetails() {
+      const db = getFirestore();
+      const querySnapshot = await getDocs(collection(db, "vehicleDetails"));
+      querySnapshot.forEach((doc) => {
+        // console.log("Document ID:", doc.id);
+        // console.log("Document data:", doc.data());
+        // this.getVehicleInfo = doc.data();
+        // console.log(this.getVehicleInfo);
+        this.getVehicleInfo.push({
+          id: doc.id,
+          data: doc.data(),
+        });
+      });
+    },
+
+    // splitCurrentBid() {
+    //   let bidWithoutCommas = this.currentBid.replace(/,/g, "");
+    //   if (bidWithoutCommas && /^\d+$/.test(bidWithoutCommas)) {
+    //     let reversedBid = bidWithoutCommas.split("").reverse().join("");
+    //     const pattern = /(\d{3})(?=\d)/g;
+    //     let formattedBid = reversedBid.replace(pattern, "$1,");
+    //     formattedBid = formattedBid.split("").reverse().join("");
+    //     this.currentBid = formattedBid;
+    //   }
+    // },
+  },
+
+  async created() {
+    const auth = getAuth();
+    // await this.getVehicle();
+    await this.getVehicleDetails();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        this.uid = user.uid;
+        console.log(this.uid);
+      } else {
+        console.log("User is signed out");
+      }
+    });
   },
 };
 </script>

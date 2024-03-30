@@ -141,28 +141,36 @@
 
   <main>
     <h2 class="text-3xl p-4 font-bold">Popular Vehicles</h2>
-    <div class=" grid grid-cols-1 md:grid-cols-4 container mx-auto gap-10 py-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 container mx-auto gap-10 py-4">
       <div
         class="max-w-sm bg-platinum border border-gray-200 rounded-lg shadow"
-        v-for="movie in movies.results" :key="movie.id"
+        v-for="info in getVehicleInfo"
+        :key="info.id"
       >
         <a href="#">
           <img
             class="rounded-t-lg w-full"
-            :src="movie.image"
+            src="https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
             alt=""
           />
         </a>
         <div class="p-5">
+          <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+            {{ info.data.year }} - {{ info.data.carMake }} -
+            {{ info.data.carModel }}
+          </p>
+
           <a href="#">
-            <h5
-              class="mb-2 text-2xl font-bold tracking-tight text-gray-900"
-            >
-              {{movie.title}}
+            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900">
+              CurrentBid ₦{{ info.data.currentBid }}
             </h5>
           </a>
+
           <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-            {{movie.imageType}}
+            {{ info.data.location }}
+          </p>
+          <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+            VIN - {{ info.data.vin }}
           </p>
           <a
             href="#"
@@ -189,40 +197,90 @@
       </div>
     </div>
   </main>
+  <div>
+    <div v-for="(imageUrl, index) in imageUrls" :key="index">
+      <img :src="imageUrl" alt="Image from Firebase Storage">
+    </div>
+  </div>
 </template>
 
 <script>
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  getDocs,
+} from "firebase/firestore";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 export default {
-    name: "Home",
-    data(){
-        return{
-            url: "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/searchComplex",
-            movies: {}
-        }
+  name: "Home",
+  data() {
+    return {
+      // url: "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/searchComplex",
+      // movies: {},
+      getVehicleInfo: [],
+      imageUrls: [],
+    };
+  },
+
+  methods: {
+    // async logMovies() {
+    //   try {
+    //     const response = await fetch(this.url, {
+    //       headers: {
+    //         "X-RapidAPI-Key":
+    //           "a3d210b05cmshbdb38d9d6af8535p109545jsn11798adfa506",
+    //         "X-RapidAPI-Host":
+    //           "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
+    //       },
+    //     });
+
+    //     const movies = await response.json();
+    //     this.movies = movies;
+    //   } catch (error) {
+    //     console.error("Error fetching data:", error);
+    //   }
+    // },
+
+    async getVehicleDetails() {
+      const db = getFirestore();
+      const querySnapshot = await getDocs(collection(db, "vehicleDetails"));
+      querySnapshot.forEach((doc) => {
+        this.getVehicleInfo.push({
+          id: doc.id,
+          data: doc.data(),
+        });
+      });
     },
-    
-    
-    methods: {
-      async logMovies() {
-        try {
-          const response = await fetch(this.url, {
-            headers: {
-              "X-RapidAPI-Key": "a3d210b05cmshbdb38d9d6af8535p109545jsn11798adfa506" ,
-              'X-RapidAPI-Host': 'spoonacular-recipe-food-nutrition-v1.p.rapidapi.com'
-            }
-          });
-          
-          const movies = await response.json();
-          this.movies = movies;
-          // console.log(movies);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
+
+    async getImages() {
+      try {
+        const db = getFirestore();
+        const storage = getStorage()
+
+        const querySnapshot = await getDocs(collection(db, 'saautos-f99ca.appspot.com/files/Img_Hero_Slide1.png'));
+        const promises = [];
+
+        querySnapshot.forEach((doc) => {
+          const imagePath = doc.data().path; 
+          const storageRef = ref(storage, imagePath);
+          promises.push(getDownloadURL(storageRef));
+        });
+
+        const urls = await Promise.all(promises);
+        this.imageUrls = urls;
+      } catch (error) {
+        console.error('Error getting images:', error.message);
       }
     },
-    created(){
-        // console.log("Created")
-        this.logMovies()
-    },
-}
+  },
+
+  async created() {
+    // this.logMovies();
+    await this.getVehicleDetails();
+    await this.getImages();
+  },
+};
 </script>
