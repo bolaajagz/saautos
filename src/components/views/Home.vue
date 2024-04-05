@@ -150,7 +150,7 @@
         <a href="#">
           <img
             class="rounded-t-lg w-full"
-            src="https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+            :src="info.data.images"
             alt=""
           />
         </a>
@@ -255,32 +255,61 @@ export default {
       });
     },
 
-    async getImages() {
-      try {
-        const db = getFirestore();
-        const storage = getStorage()
+    // async getImages() {
+    //   try {
+    //     const db = getFirestore();
+    //     const storage = getStorage()
 
-        const querySnapshot = await getDocs(collection(db, 'saautos-f99ca.appspot.com/files/Img_Hero_Slide1.png'));
-        const promises = [];
+    //     const querySnapshot = await getDocs(collection(db, 'saautos-f99ca.appspot.com/files/Img_Hero_Slide1.png'));
+    //     const promises = [];
 
-        querySnapshot.forEach((doc) => {
-          const imagePath = doc.data().path; 
-          const storageRef = ref(storage, imagePath);
-          promises.push(getDownloadURL(storageRef));
-        });
+    //     querySnapshot.forEach((doc) => {
+    //       const imagePath = doc.data().path; 
+    //       const storageRef = ref(storage, imagePath);
+    //       promises.push(getDownloadURL(storageRef));
+    //     });
 
-        const urls = await Promise.all(promises);
-        this.imageUrls = urls;
-      } catch (error) {
-        console.error('Error getting images:', error.message);
-      }
-    },
+    //     const urls = await Promise.all(promises);
+    //     this.imageUrls = urls;
+    //   } catch (error) {
+    //     console.error('Error getting images:', error.message);
+    //   }
+    // },
+//     async getImages() {
+//   try {
+//     const querySnapshot = await getDocs(collection(db, 'vehicleDetails'));
+//     const imageUrls = [];
+
+//     querySnapshot.forEach((doc) => {
+//       const data = doc.data();
+//       if (data.images) {
+//         // If the document has the "images" field
+//         // Push the download URL(s) into the imageUrls array
+//         if (Array.isArray(data.images)) {
+//           // If "images" field is an array of URLs
+//           data.images.forEach((imageUrl) => {
+//             imageUrls.push(imageUrl);
+//           });
+//         } else {
+//           // If "images" field is a single URL
+//           imageUrls.push(data.images);
+//         }
+//       }
+//     });
+
+//     // Now imageUrls array contains the download URLs of all images from all documents
+//     // Use this array to display images or perform other operations
+//   } catch (error) {
+//     console.error('Error getting images:', error.message);
+//   }
+// }
+
   },
 
   async created() {
     // this.logMovies();
     await this.getVehicleDetails();
-    await this.getImages();
+    // await this.getImages();
   },
 };
 </script>

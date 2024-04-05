@@ -81,7 +81,7 @@
           placeholder=""
           required
           v-model="vehicleDetails.currentBid"
-          @input="splitCurrentBi"
+          @input="splitCurrentBid()"
         />
         <label
           for="Current Bid"
@@ -151,17 +151,6 @@
       Submit
     </button>
   </form>
-  <!-- <div>
-    <h2>Vehicle Details</h2>
-    <ul class="grid grid-cols-3 gap-10">
-      <li v-for="info in getVehicleInfo" :key="info.id">
-        <h3>{{ info.id }}</h3>
-        <p v-for="(value, key) in info.data" :key="key">
-          {{ key }}: {{ value }}
-        </p>
-      </li>
-    </ul>
-  </div> -->
 </template>
 
 <script>
@@ -172,55 +161,68 @@ import {
   doc,
   getDoc,
   getDocs,
+  updateDoc,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default {
   name: "Product Form",
   data() {
     return {
       vehicleDetails: {
-        carMake: "toyota",
-        carModel: "camry",
+        carMake: "Toyota",
+        carModel: "Corolla",
         location: "lagos",
         year: "2014",
-        currentBid: "₦10000",
-        phoneNumber: "0803-123-4567",
-        // images: [""],
-        vin: "12345567",
+        currentBid: "20000000",
+        phoneNumber: "0803-000-0000",
+        images: [""],
+        vin: "234567",
         uid: null,
       },
       selectedFile: null,
-      // getVehicleInfo: [],
+      getVehicleInfo: [],
     };
   },
   methods: {
     async submitForm() {
       const db = getFirestore();
       const storage = getStorage();
-
+      await uploadImagesAndStoreURLs();
       this.vehicleDetails.uid = this.uid;
 
       try {
-        // Add vehicleDetails to Firestore
+        // Add vehicleDetails to Firestore Database
         const docRef = await addDoc(
           collection(db, "vehicleDetails"),
           this.vehicleDetails
         );
-        console.log("Document added with ID: ", docRef.id);
+
+        // console.log("Document added with ID: ", docRef.id);
 
         // Upload file to Firebase Storage if selectedFile exists
         if (this.selectedFile) {
           const storageRef = ref(storage, `files/${this.selectedFile.name}`);
           await uploadBytes(storageRef, this.selectedFile);
-          console.log("File uploaded successfully");
+
+          const downloadURL = await getDownloadURL(storageRef);
+
+          // Store download URL in Firestore Database
+          const vehicleDetailsRef = collection(db, "vehicleDetails");
+          const querySnapshot = await getDocs(vehicleDetailsRef);
+
+          querySnapshot.forEach(async (doc) => {
+            const data = doc.data();
+            if (data.vin === this.vehicleDetails.vin) {
+              const vehicleDetailsDocRef = doc.ref;
+              await updateDoc(vehicleDetailsDocRef, { images: downloadURL });
+            }
+          });
+          alert("File uploaded successfully");
         }
       } catch (error) {
-        console.error(
-          "Error adding document or uploading file: ",
-          error.message
-        );
+        alert("Error adding document or uploading file: ", error.message);
       }
     },
 
@@ -256,16 +258,16 @@ export default {
       });
     },
 
-    // splitCurrentBid() {
-    //   let bidWithoutCommas = this.currentBid.replace(/,/g, "");
-    //   if (bidWithoutCommas && /^\d+$/.test(bidWithoutCommas)) {
-    //     let reversedBid = bidWithoutCommas.split("").reverse().join("");
-    //     const pattern = /(\d{3})(?=\d)/g;
-    //     let formattedBid = reversedBid.replace(pattern, "$1,");
-    //     formattedBid = formattedBid.split("").reverse().join("");
-    //     this.currentBid = formattedBid;
-    //   }
-    // },
+    splitCurrentBid() {
+      let bidWithoutCommas = this.vehicleDetails.currentBid.replace(/,/g, "");
+      if (bidWithoutCommas && /^\d+$/.test(bidWithoutCommas)) {
+        let reversedBid = bidWithoutCommas.split("").reverse().join("");
+        const pattern = /(\d{3})(?=\d)/g;
+        let formattedBid = reversedBid.replace(pattern, "$1,");
+        formattedBid = formattedBid.split("").reverse().join("");
+        this.vehicleDetails.currentBid = formattedBid;
+      }
+    },
   },
 
   async created() {
