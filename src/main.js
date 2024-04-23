@@ -11,6 +11,7 @@ import Home from "../src/components/views/Home.vue";
 import GetStarted from "./components/views/GetStarted.vue";
 import productForm from "./components/views/productForm.vue";
 import login from "./components/views/login.vue";
+import Auction from "./components/views/Auction.vue";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
@@ -26,7 +27,8 @@ const routes = [
   { path: "/", component: Home },
   { path: "/getstarted", component: GetStarted },
   { path: "/productForm", component: productForm },
-  { path: "/login", component: login}
+  { path: "/login", component: login},
+  { path: "/auction", component:Auction}
 ];
 
 const router = createRouter({
@@ -58,4 +60,3 @@ createApp(App)
     .use(router)
     .mount("#app");
 
-// export { storage }

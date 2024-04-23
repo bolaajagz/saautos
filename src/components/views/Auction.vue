@@ -1,9 +1,9 @@
-<template>
+<template class="">
   <div>
     <p>Auction For Today</p>
   </div>
 
-  <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+  <div class="relative overflow-x-auto shadow-md sm:rounded-lg container mx-auto py-10">
     <table class="w-full text-sm text-left rtl:text-right text-gray-500">
       <thead class="text-xs text-white uppercase bg-[#3f403f]">
         <tr>
@@ -16,55 +16,18 @@
           </th>
         </tr>
       </thead>
-      <tbody>
-        <tr class="bg-[#e6e8e6] border-b hover:bg-gray-50">
+      <tbody v-for="info in getInfo" :key="info.id" >
+        <tr class=" border-b hover:bg-gray-50 [&>*:nth-child(odd)]:bg-[#e6e8e6] [&>*:nth-child(even)]:bg-[#3f403f33]">
           <th
             scope="row"
             class="px-6 py-4 font-medium text-black whitespace-nowrap"
+            
           >
-            Apple MacBook Pro 17"
+            {{ info.data.carMake }}
           </th>
-          <td class="px-6 py-4 text-black">Silver</td>
-          <td class="px-6 py-4 text-black">Laptop</td>
-          <td class="px-6 py-4 text-black">₦2999</td>
-          <td class="px-6 py-4 text-right">
-            <button
-              href="#"
-              class="font-medium text-white bg-platinum-80 focus:ring-4 focus:outline-none focus:ring-platinum-30 rounded-lg text-sm px-5 py-2.5 hover:underline"
-            >
-              Place Bid
-            </button>
-          </td>
-        </tr>
-        <tr class="bg-[#fff] border-b hover:bg-gray-50">
-          <th
-            scope="row"
-            class="px-6 py-4 font-medium whitespace-nowrap text-black"
-          >
-            Microsoft Surface Pro
-          </th>
-          <td class="px-6 py-4 text-black">White</td>
-          <td class="px-6 py-4 text-black">Laptop</td>
-          <td class="px-6 py-4 text-black">₦1999</td>
-          <td class="px-6 py-4 text-right">
-            <button
-              href="#"
-              class="font-medium text-white bg-platinum-80 focus:ring-4 focus:outline-none focus:ring-platinum-30 rounded-lg text-sm px-5 py-2.5 hover:underline"
-            >
-              Place Bid
-            </button>
-          </td>
-        </tr>
-        <tr class="bg-[#e6e8e6] hover:bg-gray-50">
-          <th
-            scope="row"
-            class="px-6 py-4 font-medium text-black whitespace-nowrap"
-          >
-            Magic Mouse 2
-          </th>
-          <td class="px-6 py-4 text-black">Black</td>
-          <td class="px-6 py-4 text-black">Accessories</td>
-          <td class="px-6 py-4 text-black">₦199</td>
+          <td class="px-6 py-4 text-black">{{ info.data.date }}</td>
+          <td class="px-6 py-4 text-black">{{ info.data.carLocation }}</td>
+          <td class="px-6 py-4 text-black">{{ info.data.initialPrice }}</td>
           <td class="px-6 py-4 text-right">
             <button
               href="#"
@@ -78,7 +41,7 @@
     </table>
   </div>
 
-  <form class="container mx-auto py-10">
+  <form class="container mx-auto py-10" @submit.prevent="submitAuction">
     <h1 class="text-3xl py-8">Auction Info</h1>
     <div class="grid md:grid-cols-2 md:gap-6">
       <div class="relative z-0 w-full mb-5 group">
@@ -98,7 +61,10 @@
         >
       </div>
       <div class="relative z-0 w-full mb-5 group">
-        <select v-model="auctionDetails.carLocation"   class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-onyx peer">
+        <select
+          v-model="auctionDetails.carLocation"
+          class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-onyx peer"
+        >
           <option disabled>Select Your Location</option>
           <option :value="state.name" v-for="state in nigeriaStates">
             {{ state.name }}
@@ -229,13 +195,15 @@
       type="submit"
       class="text-white bg-platinum-80 hover:bg-platinum-20 focus:ring-4 focus:outline-none focus:ring-platinum-30 font-medium rounded-lg text-sm px-5 py-2.5"
     >
-      <marquee v-if="isLoading" class="cursor-progress">Loading......</marquee> 
-      <span v-else class="cursor-pointer">Submit</span> 
+      <marquee v-if="isLoading" class="cursor-progress">Loading......</marquee>
+      <span v-else class="cursor-pointer">Submit</span>
     </button>
   </form>
 </template>
 
 <script>
+import { addDoc, collection, getFirestore, getDocs } from "firebase/firestore";
+
 export default {
   data() {
     return {
@@ -285,10 +253,47 @@ export default {
         initialPrice: "",
         date: "",
       },
-      isLoading:false
+      isLoading: false,
+      getInfo: []
     };
   },
+  
   methods: {
+    async submitAuction() {
+      const db = getFirestore();
+      this.isLoading = true;
+      try {
+        const doc = await addDoc(
+          collection(db, "vehicleAuction"),
+          this.auctionDetails
+        );
+        console.log("auction information saved to db: " + doc);
+        this.auctionDetails = {
+          carMake: "",
+          carLocation: "Select Your Location",
+          initialPrice: "",
+          date: "",
+        };
+        this.isLoading = false;
+      } catch (error) {
+        console.error(error.message);
+      }
+    },
+    async getAuctionInfo(){
+        const db = getFirestore()
+        const querySnapshot = await getDocs(collection(db, "vehicleAuction"))
+        querySnapshot.forEach((doc)=>{
+            this.getInfo.push({
+                id: doc.id,
+                data: doc.data()
+            })
+        })
+    }
   },
+
+  async created(){
+    await this.getAuctionInfo()
+    this.getInfo
+  }
 };
 </script>

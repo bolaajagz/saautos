@@ -26,15 +26,3 @@ export default {
   plugins: [
   ],
 }
-
-// #3f403f at 100% opacity: #3f403f
-// #3f403f at 90% opacity: #3f403fE6 
-// #3f403f at 80% opacity: #3f403fCC 
-// #3f403f at 70% opacity: #3f403fB3 
-// #3f403f at 60% opacity: #3f403f99 
-// #3f403f at 50% opacity: #3f403f80
-// #3f403f at 40% opacity: #3f403f66 
-// #3f403f at 30% opacity: #3f403f4D 
-// #3f403f at 20% opacity: #3f403f33 
-// #3f403f at 10% opacity: #3f403f1A 
-// #3f403f at 0% opacity (completely transparent): #3f403f00
