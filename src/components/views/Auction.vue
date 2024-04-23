@@ -12,16 +12,18 @@
         name="Current Price"
         id="Current Price"
         class=""
-        placeholder=""
+        placeholder="{{ currentInfo.initialPrice }}"
       />
-      <button>Place Bid</button>
     </template>
 
-    <template v-slot:footer> ... </template>
+    <template v-slot:footer>
+      <button class="p-4 bg-blue-100 rounded-xl">Place Bid</button>
+    </template>
   </Modal>
 
   <div
     class="relative overflow-x-auto shadow-md sm:rounded-lg container mx-auto py-10"
+    :class="[this.isModalVisible && 'blur']"
   >
     <table class="w-full text-sm text-left rtl:text-right text-gray-500">
       <thead class="text-xs text-white uppercase bg-[#3f403f]">
@@ -36,7 +38,7 @@
           </th>
         </tr>
       </thead>
-      <tbody v-for="info in getInfo" :key="info.id">
+      <tbody v-for="(info, index) in getInfo" :key="info.id">
         <tr
           class="border-b hover:bg-gray-50 [&>*:nth-child(odd)]:bg-[#e6e8e6] [&>*:nth-child(even)]:bg-[#3f403f33]"
         >
@@ -54,7 +56,7 @@
             <button
               href="#"
               class="font-medium text-white bg-platinum-80 focus:ring-4 focus:outline-none focus:ring-platinum-30 rounded-lg text-sm px-5 py-2.5 hover:underline"
-              @click="showModal"
+              @click="showModal(index)"
             >
               Place Bid
             </button>
@@ -227,7 +229,7 @@
 <script>
 import { addDoc, collection, getFirestore, getDocs } from "firebase/firestore";
 import nigeriaStates from "../../helpers/nigeriaStates";
-import Modal from "./Modal";
+import Modal from "../Modal.vue";
 
 export default {
   data() {
@@ -243,6 +245,7 @@ export default {
       isLoading: false,
       getInfo: [],
       isModalVisible: false,
+      currentInfo: {},
     };
   },
 
@@ -277,9 +280,11 @@ export default {
         });
       });
     },
-    showModal() {
-      console.log("clicked");
+    showModal(id) {
+      console.log(id);
       this.isModalVisible = true;
+      console.log(this.getInfo[id]);
+      this.currentInfo = this.getInfo[id];
     },
     closeModal() {
       this.isModalVisible = false;
