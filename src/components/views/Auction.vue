@@ -3,7 +3,26 @@
     <p>Auction For Today</p>
   </div>
 
-  <div class="relative overflow-x-auto shadow-md sm:rounded-lg container mx-auto py-10">
+  <Modal v-show="isModalVisible" @close="closeModal">
+    <template v-slot:header> Place Bid </template>
+
+    <template v-slot:body>
+      <input
+        type="text"
+        name="Current Price"
+        id="Current Price"
+        class=""
+        placeholder=""
+      />
+      <button>Place Bid</button>
+    </template>
+
+    <template v-slot:footer> ... </template>
+  </Modal>
+
+  <div
+    class="relative overflow-x-auto shadow-md sm:rounded-lg container mx-auto py-10"
+  >
     <table class="w-full text-sm text-left rtl:text-right text-gray-500">
       <thead class="text-xs text-white uppercase bg-[#3f403f]">
         <tr>
@@ -11,27 +30,31 @@
           <th scope="col" class="px-6 py-3">Time</th>
           <th scope="col" class="px-6 py-3">Location</th>
           <th scope="col" class="px-6 py-3">Initial Price</th>
+          <th scope="col" class="px-6 py-3">Current Price</th>
           <th scope="col" class="px-6 py-3">
             <span class="sr-only">Edit</span>
           </th>
         </tr>
       </thead>
-      <tbody v-for="info in getInfo" :key="info.id" >
-        <tr class=" border-b hover:bg-gray-50 [&>*:nth-child(odd)]:bg-[#e6e8e6] [&>*:nth-child(even)]:bg-[#3f403f33]">
+      <tbody v-for="info in getInfo" :key="info.id">
+        <tr
+          class="border-b hover:bg-gray-50 [&>*:nth-child(odd)]:bg-[#e6e8e6] [&>*:nth-child(even)]:bg-[#3f403f33]"
+        >
           <th
             scope="row"
             class="px-6 py-4 font-medium text-black whitespace-nowrap"
-            
           >
             {{ info.data.carMake }}
           </th>
           <td class="px-6 py-4 text-black">{{ info.data.date }}</td>
           <td class="px-6 py-4 text-black">{{ info.data.carLocation }}</td>
           <td class="px-6 py-4 text-black">{{ info.data.initialPrice }}</td>
+          <td class="px-6 py-4 text-black">{{ info.data.currentPrice }}</td>
           <td class="px-6 py-4 text-right">
             <button
               href="#"
               class="font-medium text-white bg-platinum-80 focus:ring-4 focus:outline-none focus:ring-platinum-30 rounded-lg text-sm px-5 py-2.5 hover:underline"
+              @click="showModal"
             >
               Place Bid
             </button>
@@ -203,49 +226,13 @@
 
 <script>
 import { addDoc, collection, getFirestore, getDocs } from "firebase/firestore";
+import nigeriaStates from "../../helpers/nigeriaStates";
+import Modal from "./Modal";
 
 export default {
   data() {
     return {
-      nigeriaStates: [
-        { id: 1, name: "Abia" },
-        { id: 2, name: "Adamawa" },
-        { id: 3, name: "Akwa Ibom" },
-        { id: 4, name: "Anambra" },
-        { id: 5, name: "Bauchi" },
-        { id: 6, name: "Bayelsa" },
-        { id: 7, name: "Benue" },
-        { id: 8, name: "Borno" },
-        { id: 9, name: "Cross River" },
-        { id: 10, name: "Delta" },
-        { id: 11, name: "Ebonyi" },
-        { id: 12, name: "Edo" },
-        { id: 13, name: "Ekiti" },
-        { id: 14, name: "Enugu" },
-        { id: 15, name: "FCT (Abuja)" },
-        { id: 16, name: "Gombe" },
-        { id: 17, name: "Imo" },
-        { id: 18, name: "Jigawa" },
-        { id: 19, name: "Kaduna" },
-        { id: 20, name: "Kano" },
-        { id: 21, name: "Katsina" },
-        { id: 22, name: "Kebbi" },
-        { id: 23, name: "Kogi" },
-        { id: 24, name: "Kwara" },
-        { id: 25, name: "Lagos" },
-        { id: 26, name: "Nasarawa" },
-        { id: 27, name: "Niger" },
-        { id: 28, name: "Ogun" },
-        { id: 29, name: "Ondo" },
-        { id: 30, name: "Osun" },
-        { id: 31, name: "Oyo" },
-        { id: 32, name: "Plateau" },
-        { id: 33, name: "Rivers" },
-        { id: 34, name: "Sokoto" },
-        { id: 35, name: "Taraba" },
-        { id: 36, name: "Yobe" },
-        { id: 37, name: "Zamfara" },
-      ],
+      nigeriaStates,
       selected: "Select Your Location",
       auctionDetails: {
         carMake: "",
@@ -254,10 +241,11 @@ export default {
         date: "",
       },
       isLoading: false,
-      getInfo: []
+      getInfo: [],
+      isModalVisible: false,
     };
   },
-  
+
   methods: {
     async submitAuction() {
       const db = getFirestore();
@@ -279,21 +267,32 @@ export default {
         console.error(error.message);
       }
     },
-    async getAuctionInfo(){
-        const db = getFirestore()
-        const querySnapshot = await getDocs(collection(db, "vehicleAuction"))
-        querySnapshot.forEach((doc)=>{
-            this.getInfo.push({
-                id: doc.id,
-                data: doc.data()
-            })
-        })
-    }
+    async getAuctionInfo() {
+      const db = getFirestore();
+      const querySnapshot = await getDocs(collection(db, "vehicleAuction"));
+      querySnapshot.forEach((doc) => {
+        this.getInfo.push({
+          id: doc.id,
+          data: doc.data(),
+        });
+      });
+    },
+    showModal() {
+      console.log("clicked");
+      this.isModalVisible = true;
+    },
+    closeModal() {
+      this.isModalVisible = false;
+    },
   },
 
-  async created(){
-    await this.getAuctionInfo()
-    this.getInfo
-  }
+  components: {
+    Modal,
+  },
+
+  async created() {
+    await this.getAuctionInfo();
+    this.getInfo;
+  },
 };
 </script>
