@@ -136,10 +136,10 @@
           </li>
 
           <li>
-            <a
-              href="#"
+            <router-link
+              to="/auction"
               class="block py-2 px-3 text-white rounded md:bg-transparent md:p-0 hover:bg-platinum-30"
-              >Auctions</a
+              >Auctions</router-link
             >
           </li>
           <li>
@@ -249,7 +249,7 @@
               >
                 <li>
                   <router-link
-                    to="../getstarted"
+                     to="/getstarted" 
                     class="block px-4 py-2 hover:bg-platinum-30"
                     >Register</router-link
                   >
