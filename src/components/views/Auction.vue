@@ -1,5 +1,5 @@
-<template class="">
-  <div>
+<template>
+  <div class="container mx-auto py-4 text-2xl">
     <p>Auction For Today</p>
   </div>
 
@@ -10,9 +10,8 @@
       <input
         type="text"
         name="Current Price"
-        id="Current Price"
         class=""
-        placeholder="{{ currentInfo.initialPrice }}"
+        :placeholder="currentInfo"
       />
     </template>
 
@@ -56,7 +55,7 @@
             <button
               href="#"
               class="font-medium text-white bg-platinum-80 focus:ring-4 focus:outline-none focus:ring-platinum-30 rounded-lg text-sm px-5 py-2.5 hover:underline"
-              @click="showModal(index)"
+              @click="showModal(info.id)"
             >
               Place Bid
             </button>
@@ -249,6 +248,10 @@ export default {
     };
   },
 
+  components: {
+    Modal
+  },
+
   methods: {
     async submitAuction() {
       const db = getFirestore();
@@ -281,18 +284,18 @@ export default {
       });
     },
     showModal(id) {
-      console.log(id);
+      // console.log(id);
       this.isModalVisible = true;
-      console.log(this.getInfo[id]);
-      this.currentInfo = this.getInfo[id];
+      const clickedId = id;
+      this.getInfo.forEach((info) => {
+        if (info.id === clickedId) {
+          this.currentInfo = info.data.currentPrice;
+        }
+      });
     },
     closeModal() {
       this.isModalVisible = false;
     },
-  },
-
-  components: {
-    Modal,
   },
 
   async created() {
