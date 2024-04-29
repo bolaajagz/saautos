@@ -227,7 +227,6 @@ import {
 } from "firebase/firestore";
 import nigeriaStates from "../helpers/nigeriaStates";
 import Modal from "../components/Modal.vue";
-import { formatCurrency } from "../helpers/currencyFormatter";
 
 export default {
   data() {
@@ -274,7 +273,7 @@ export default {
           collection(db, "vehicleAuction"),
           this.auctionDetails
         );
-        console.log("auction information saved to db: " + doc);
+        // console.log("auction information saved to db: " + doc);
         this.auctionDetails = {
           carMake: "",
           carLocation: "Select Your Location",
