@@ -1,8 +1,8 @@
 <script setup>
 import Header from "./components/Header.vue";
 import Footer from "./components/Footer.vue";
-import Home from "./components/views/Home.vue";
-import GetStarted from "./components/views/GetStarted.vue";
+// import Home from "./components/views/Home.vue";
+// import GetStarted from "./components/views/GetStarted.vue";
 </script>
 
 <template>

@@ -7,11 +7,11 @@ import { initializeApp } from "firebase/app";
 
 import { getAuth } from "firebase/auth";
 import { createMemoryHistory, createRouter } from "vue-router";
-import Home from "../src/components/views/Home.vue";
-import GetStarted from "./components/views/GetStarted.vue";
-import productForm from "./components/views/productForm.vue";
-import login from "./components/views/login.vue";
-import Auction from "./components/views/Auction.vue";
+import Home from "./views/Home.vue";
+import GetStarted from "./views/GetStarted.vue";
+import productForm from "./views/productForm.vue";
+import login from "./views/login.vue";
+import Auction from "./views/Auction.vue";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
