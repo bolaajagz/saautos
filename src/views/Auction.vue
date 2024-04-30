@@ -273,7 +273,7 @@ export default {
           collection(db, "vehicleAuction"),
           this.auctionDetails
         );
-        // console.log("auction information saved to db: " + doc);
+        console.log("auction information saved to db: " + doc);
         this.auctionDetails = {
           carMake: "",
           carLocation: "Select Your Location",
