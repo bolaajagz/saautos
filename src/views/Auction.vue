@@ -58,7 +58,7 @@
   </Modal>
 
   <div
-    class="relative overflow-x-auto shadow-md sm:rounded-lg container mx-auto py-10"
+    class="relative shadow-md sm:rounded-lg container mx-auto"
     :class="[this.isModalVisible && 'blur']"
   >
     <table class="w-full text-sm text-left rtl:text-right text-gray-500">
@@ -104,7 +104,7 @@
 
   <form class="container mx-auto py-10" @submit.prevent="submitAuction">
     <h1 class="text-3xl py-8">Auction Info</h1>
-    <div class="grid md:grid-cols-2 md:gap-6">
+    <div class="grid md:grid-cols-2 md:gap-6 ">
       <div class="relative z-0 w-full mb-5 group">
         <input
           type="text"
@@ -152,8 +152,8 @@
           class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-onyx peer"
           placeholder=" "
           required
-          v-model="auctionDetails.initialPrice"
-          @input="format()"
+          v-model="formattedValue"
+
         />
         <label
           for="Initial Price"
@@ -226,7 +226,8 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import nigeriaStates from "../helpers/nigeriaStates";
-import Modal from "../components/Modal.vue";
+import Modal from "../components/Modal.vue"; 
+import {formatNumber} from "../helpers/currencyFormatter";
 
 export default {
   data() {
@@ -239,6 +240,7 @@ export default {
         initialPrice: "",
         date: "",
         currentPrice: "",
+        inputValue: "",
       },
       isLoading: false,
       getInfo: [],
@@ -250,21 +252,10 @@ export default {
   },
 
   components: {
-    Modal,
+    Modal, 
   },
 
   methods: {
-    format() {
-      let bidWithoutCommas = this.auctionDetails.initialPrice.replace(/,/g, "");
-      if (bidWithoutCommas && /^\d+$/.test(bidWithoutCommas)) {
-        let reversedBid = bidWithoutCommas.split("").reverse().join("");
-        const pattern = /(\d{3})(?=\d)/g;
-        let formattedBid = reversedBid.replace(pattern, "$1,");
-        formattedBid = formattedBid.split("").reverse().join("");
-        this.auctionDetails.initialPrice = formattedBid;
-      }
-    },
-
     async submitAuction() {
       const db = getFirestore();
       this.isLoading = true;
@@ -343,6 +334,17 @@ export default {
         console.log(error.message, "currentPrice");
       }
     },
+  },
+
+  computed: {
+    formattedValue: {
+      get() {
+        return this.auctionDetails.initialPrice;
+      },
+      set(value) {
+        this.auctionDetails.initialPrice = formatNumber(value);
+      }
+    }
   },
 
   async created() {

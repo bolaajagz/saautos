@@ -81,8 +81,8 @@
           class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-onyx peer"
           placeholder=""
           required
-          v-model="vehicleDetails.currentBid"
-          @input="splitCurrentBid()"
+          v-model="formattedValue"
+          
         />
         <label
           for="Current Bid"
@@ -196,18 +196,19 @@ import {
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { formatNumber } from "../helpers/currencyFormatter";
 
 export default {
   name: "Product Form",
   data() {
     return {
       vehicleDetails: {
-        carMake: "Toyota",
-        carModel: "Corolla",
-        location: "lagos",
-        year: "2014",
-        currentBid: "20000000",
-        phoneNumber: "0803-000-0000",
+        carMake: "",
+        carModel: "",
+        location: "",
+        year: "",
+        currentBid: "",
+        phoneNumber: "",
         images: [""],
         vin: "",
         uid: null,
@@ -275,7 +276,6 @@ export default {
             }
           });
           alert("File uploaded successfully");
-          // Reset form
           this.vehicleDetails = {
             carMake: "",
             carModel: "",
@@ -335,23 +335,9 @@ export default {
     //     });
     //   });
     // },
-
-    splitCurrentBid() {
-      let bidWithoutCommas = this.vehicleDetails.currentBid.replace(/,/g, "");
-      if (bidWithoutCommas && /^\d+$/.test(bidWithoutCommas)) {
-        let reversedBid = bidWithoutCommas.split("").reverse().join("");
-        const pattern = /(\d{3})(?=\d)/g;
-        let formattedBid = reversedBid.replace(pattern, "$1,");
-        formattedBid = formattedBid.split("").reverse().join("");
-        this.vehicleDetails.currentBid = formattedBid;
-      }
-    },
   },
   async created() {
     const auth = getAuth();
-    // await this.getVehicle();
-    // await this.getVehicleDetailz();
-
     onAuthStateChanged(auth, (user) => {
       if (user) {
         this.uid = user.uid;
@@ -361,5 +347,16 @@ export default {
       }
     });
   },
+
+  computed: {
+    formattedValue: {
+      get(){
+        return this.vehicleDetails.currentBid
+      },
+      set(value){
+        this.vehicleDetails.currentBid = formatNumber(value);
+      }
+    }
+  }
 };
 </script>
